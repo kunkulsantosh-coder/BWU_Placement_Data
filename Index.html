@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BWU Student Intelligence System</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f0f4f8;--bg2:#ffffff;--bg3:#f5f7fa;--bg4:#eef1f6;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--text2:#475569;--text3:#94a3b8}
+*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px}
+.shell{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:225px;background:linear-gradient(180deg,#1e293b 0%,#0f172a 100%);border-right:1px solid #334155;display:flex;flex-direction:column;flex-shrink:0;transition:width .25s}
+.sidebar.mini{width:62px}
+.logo-area{padding:15px;border-bottom:1px solid #334155;display:flex;align-items:center;gap:10px}
+.logo-orb{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#00dc82,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 0 18px #00dc8244}
+.logo-txt{overflow:hidden;white-space:nowrap}
+.logo-name{font-size:13px;font-weight:700;color:#f1f5f9}
+.logo-sub{font-size:10px;color:#64748b}
+nav{flex:1;padding:10px 8px;overflow-y:auto}
+.ng{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1px;padding:10px 8px 4px;overflow:hidden;white-space:nowrap}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;color:#94a3b8;margin:1px 0;transition:all .15s;overflow:hidden;white-space:nowrap;border-left:3px solid transparent}
+.ni:hover{background:rgba(255,255,255,.08);color:#f1f5f9}
+.ni.active{color:#fff;font-weight:600}
+.ni[data-p=dashboard].active{background:rgba(0,220,130,.15);border-left-color:#00dc82}
+.ni[data-p=placement].active{background:rgba(59,130,246,.15);border-left-color:#3b82f6}
+.ni[data-p=academic].active{background:rgba(245,158,11,.15);border-left-color:#f59e0b}
+.ni[data-p=streams].active{background:rgba(168,85,247,.15);border-left-color:#a855f7}
+.ni[data-p=skills].active{background:rgba(6,182,212,.15);border-left-color:#06b6d4}
+.ni[data-p=chatbot].active{background:rgba(236,72,153,.15);border-left-color:#ec4899}
+.ni-ico{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.sb-foot{padding:10px 8px;border-top:1px solid #334155}
+.mb{width:100%;background:rgba(255,255,255,.08);border:1px solid #334155;color:#94a3b8;border-radius:8px;padding:7px;cursor:pointer;font-size:12px;text-align:center}
+.mb:hover{background:rgba(255,255,255,.12);color:#f1f5f9}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:58px;background:#ffffff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ptitle{font-size:16px;font-weight:700;flex:1;background:linear-gradient(90deg,#059669,#3b82f6,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tchip{background:#f1f5f9;border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.ldot{width:7px;height:7px;border-radius:50%;background:#059669;box-shadow:0 0 7px #05966988;animation:lp 2s infinite}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.4}}
+.apibar{background:linear-gradient(90deg,#f0f9ff,#f0fdf4);border-bottom:1px solid #bae6fd;padding:8px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap}
+.albl{font-size:11px;color:#0369a1;font-weight:700;white-space:nowrap}
+.api-toggle{display:flex;gap:0;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;flex-shrink:0}
+.api-tab{padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:#fff;color:#64748b;transition:all .15s;white-space:nowrap}
+.api-tab.active.claude{background:linear-gradient(90deg,#7c3aed,#4f46e5);color:#fff}
+.api-tab.active.openai{background:linear-gradient(90deg,#059669,#0891b2);color:#fff}
+.api-tab:first-child{border-right:1px solid #e2e8f0}
+.ainp{flex:1;min-width:180px;max-width:340px;background:#fff;border:1px solid #93c5fd;border-radius:7px;padding:5px 10px;color:#1e293b;font-size:12px;outline:none;font-family:monospace}
+.ainp:focus{border-color:#3b82f6;box-shadow:0 0 0 3px #bfdbfe}
+.asave{background:linear-gradient(90deg,#4f46e5,#059669);color:#fff;border:none;border-radius:7px;padding:5px 14px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap}
+.asave:hover{opacity:.9}
+.astat{font-size:11px;white-space:nowrap}
+.api-hint{font-size:10px;color:#64748b}
+.content{flex:1;overflow-y:auto;padding:18px 20px;background:linear-gradient(135deg,#f0fdf4 0%,#eff6ff 50%,#faf5ff 100%)}
+.page{display:none}.page.active{display:block}
+
+/* Year filter bar */
+.ybar{padding:8px 20px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.ylbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.ybtn-group{display:flex;gap:4px;flex-wrap:wrap}
+.ybtn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border2);background:#fff;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ybtn:hover{border-color:#7c3aed;color:#7c3aed;background:#faf5ff}
+.ybtn.active{color:#fff;border-color:transparent}
+.ybtn[data-y="all"].active{background:linear-gradient(90deg,#059669,#3b82f6)}
+.ybtn[data-y="2024"].active{background:linear-gradient(90deg,#d97706,#dc2626)}
+.ybtn[data-y="2025"].active{background:linear-gradient(90deg,#7c3aed,#4f46e5)}
+.ybtn[data-y="2026"].active{background:linear-gradient(90deg,#0891b2,#059669)}
+.ystat{margin-left:auto;font-size:11px;color:var(--text2);white-space:nowrap;background:#f8fafc;border:1px solid var(--border);padding:3px 10px;border-radius:20px}
+
+/* Charts */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.cg.g3{grid-template-columns:1fr 1fr 1fr}
+.kico{font-size:24px;margin-bottom:7px;display:block}
+.kv{font-size:26px;font-weight:800;line-height:1;margin-bottom:4px}
+/* KPI */
+.kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.kc{border-radius:14px;padding:15px;position:relative;overflow:hidden;border:1px solid;transition:transform .2s}
+.kc:hover{transform:translateY(-3px)}
+.kc{border-radius:14px;padding:15px;position:relative;overflow:hidden;border:1px solid;transition:transform .2s}
+.kc:hover{transform:translateY(-3px)}
+.kc.g1{background:linear-gradient(135deg,#dcfce7,#bbf7d0);border-color:#86efac;box-shadow:0 4px 16px #22c55e22}
+.kc.g2{background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-color:#93c5fd;box-shadow:0 4px 16px #3b82f622}
+.kc.g3{background:linear-gradient(135deg,#fef9c3,#fde68a);border-color:#fcd34d;box-shadow:0 4px 16px #f59e0b22}
+.kc.g4{background:linear-gradient(135deg,#f3e8ff,#e9d5ff);border-color:#d8b4fe;box-shadow:0 4px 16px #a855f722}
+.kc.g5{background:linear-gradient(135deg,#cffafe,#a5f3fc);border-color:#67e8f9;box-shadow:0 4px 16px #06b6d422}
+.kc.g6{background:linear-gradient(135deg,#fce7f3,#fbcfe8);border-color:#f9a8d4;box-shadow:0 4px 16px #ec489922}
+.kc.g7{background:linear-gradient(135deg,#ffedd5,#fed7aa);border-color:#fdba74;box-shadow:0 4px 16px #f9731622}
+.kc.g8{background:linear-gradient(135deg,#ccfbf1,#99f6e4);border-color:#5eead4;box-shadow:0 4px 16px #14b8a622}
+.kc.g1 .kv{color:#15803d}.kc.g2 .kv{color:#1d4ed8}.kc.g3 .kv{color:#b45309}
+.kc.g4 .kv{color:#7e22ce}.kc.g5 .kv{color:#0e7490}.kc.g6 .kv{color:#be185d}
+.kc.g7 .kv{color:#c2410c}.kc.g8 .kv{color:#0f766e}
+.kl{font-size:10px;color:#374151;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.ks{font-size:10px;color:#6b7280;margin-top:2px}
+.kglow{position:absolute;right:-8px;bottom:-8px;width:60px;height:60px;border-radius:50%;filter:blur(14px);opacity:.35}
+.kc.g1 .kglow{background:#22c55e}.kc.g2 .kglow{background:#3b82f6}.kc.g3 .kglow{background:#f59e0b}
+.kc.g4 .kglow{background:#a855f7}.kc.g5 .kglow{background:#06b6d4}.kc.g6 .kglow{background:#ec4899}
+.kc.g7 .kglow{background:#f97316}.kc.g8 .kglow{background:#14b8a6}
+
+.cc{background:#ffffff;border:1px solid var(--border);border-radius:14px;padding:15px;transition:border-color .2s;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.cc:hover{border-color:var(--border2);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.cc.full{grid-column:1/-1}
+.cch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.cct{font-size:12.5px;font-weight:700;color:var(--text)}
+.ccs{font-size:10px;color:var(--text3);margin-top:2px}
+.ccb{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.cw{position:relative}
+.h190{height:190px}.h240{height:240px}.h280{height:280px}.h320{height:320px}
+
+.tc{background:#ffffff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.th{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:#f8fafc}
+.tt{font-size:12.5px;font-weight:700;flex:1;color:var(--text)}
+.sr{background:#fff;border:1px solid var(--border2);border-radius:7px;padding:5px 10px;color:var(--text);font-size:12px;width:165px;outline:none}
+.sr:focus{border-color:#3b82f6}
+.tw{overflow-x:auto;max-height:360px;overflow-y:auto}
+table{width:100%;border-collapse:collapse}
+th{background:#f8fafc;color:#64748b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;position:sticky;top:0;z-index:1}
+th:hover{color:var(--text2)}
+td{padding:9px 12px;border-bottom:1px solid #f1f5f9;font-size:12px;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.bd{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+.bd.g{background:#dcfce7;color:#15803d;border:1px solid #86efac}
+.bd.b{background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd}
+.bd.a{background:#fef9c3;color:#a16207;border:1px solid #fde047}
+.bd.p{background:#f3e8ff;color:#7e22ce;border:1px solid #d8b4fe}
+.bd.c{background:#cffafe;color:#0e7490;border:1px solid #67e8f9}
+.pb{height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;width:65px;display:inline-block;vertical-align:middle;margin-right:5px}
+.pf{height:100%;border-radius:3px}
+.fr{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.fl{font-size:11px;color:var(--text3)}
+select.fs{background:#fff;border:1px solid var(--border2);color:var(--text);padding:5px 10px;border-radius:7px;font-size:12px;outline:none;cursor:pointer}
+select.fs:focus{border-color:#7c3aed}
+
+.csh{display:flex;height:calc(100vh - 58px - 38px);gap:14px}
+.csb{width:245px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.cm{flex:1;display:flex;flex-direction:column;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.chdr{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#f0fdf4,#eff6ff)}
+.aorb{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#059669,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 12px rgba(5,150,105,.3);flex-shrink:0}
+.ctit{font-size:13px;font-weight:700;color:#1e293b}
+.cst{font-size:10px;color:var(--text3);margin-top:1px}
+.msw{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#fafbfc}
+.mr{display:flex;gap:8px;align-items:flex-start}
+.mr.u{flex-direction:row-reverse}
+.av{width:29px;height:29px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.av.b{background:linear-gradient(135deg,#059669,#3b82f6);box-shadow:0 2px 8px rgba(5,150,105,.25)}
+.av.u{background:#e2e8f0;border:1px solid var(--border2)}
+.bb{max-width:85%;padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.65;word-wrap:break-word;white-space:pre-wrap}
+.bb.b{background:#ffffff;border:1px solid var(--border);border-radius:4px 12px 12px 12px;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.bb.u{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #93c5fd;border-radius:12px 4px 12px 12px;color:#1e40af}
+.bb.e{background:#fef2f2;border:1px solid #fecaca;color:#dc2626}
+.tyd{display:flex;gap:4px;align-items:center;padding:3px 0}
+.tyd span{width:7px;height:7px;border-radius:50%;animation:td 1s infinite}
+.tyd span:nth-child(1){background:#059669}.tyd span:nth-child(2){background:#3b82f6;animation-delay:.2s}.tyd span:nth-child(3){background:#7c3aed;animation-delay:.4s}
+@keyframes td{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-7px);opacity:1}}
+.bsrc{font-size:10px;color:var(--text3);margin-top:6px;padding-top:5px;border-top:1px solid var(--border)}
+.cia{padding:11px 14px;border-top:1px solid var(--border);background:#f8fafc}
+.cir{display:flex;gap:8px}
+.cta{flex:1;background:#fff;border:1px solid var(--border2);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;resize:none;outline:none;min-height:40px;max-height:100px;font-family:inherit;line-height:1.5}
+.cta:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.12)}
+.sb2{background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:9px;padding:9px 15px;cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0;transition:all .15s;box-shadow:0 4px 12px rgba(5,150,105,.3)}
+.sb2:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(5,150,105,.4)}
+.sb2:disabled{background:#e2e8f0;color:#94a3b8;cursor:not-allowed;transform:none;box-shadow:none}
+.ib{background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:13px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.ibt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin-bottom:8px}
+.qq{padding:7px 10px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:11.5px;color:var(--text2);margin-bottom:5px;transition:all .15s;line-height:1.4}
+.qq:hover{background:#f0fdf4;border-color:#86efac;color:#15803d}
+.sr2{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+.sr2:last-child{border-bottom:none}
+.sk{font-size:11px;color:var(--text3)}.sv{font-size:12px;font-weight:700}
+
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:2px}
+@media(max-width:800px){.cg,.cg.g3{grid-template-columns:1fr}.kg{grid-template-columns:repeat(2,1fr)}.sidebar{width:62px}.logo-txt,.ng,.ni span:not(.ni-ico){display:none}.csb{display:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar" id="sb">
+  <div class="logo-area">
+    <div class="logo-orb">🎓</div>
+    <div class="logo-txt" id="lt"><div class="logo-name">BWU Intelligence</div><div class="logo-sub">Student Analytics Platform</div></div>
+  </div>
+  <nav>
+    <div class="ng" id="ng1">ANALYTICS</div>
+    <div class="ni active" data-p="dashboard" onclick="nav(this)"><span class="ni-ico">📊</span><span>Dashboard</span></div>
+    <div class="ni" data-p="placement" onclick="nav(this)"><span class="ni-ico">🏆</span><span>Placement</span></div>
+    <div class="ni" data-p="academic" onclick="nav(this)"><span class="ni-ico">📚</span><span>Academic</span></div>
+    <div class="ni" data-p="streams" onclick="nav(this)"><span class="ni-ico">🎯</span><span>Streams</span></div>
+    <div class="ni" data-p="skills" onclick="nav(this)"><span class="ni-ico">🧠</span><span>Skills</span></div>
+    <div class="ng" id="ng2" style="margin-top:6px">AI TOOLS</div>
+    <div class="ni" data-p="chatbot" onclick="nav(this)"><span class="ni-ico">💬</span><span>AI Chatbot</span></div>
+  </nav>
+  <div class="sb-foot"><button class="mb" onclick="toggleSB()" id="sbbtn">◀ Collapse</button></div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="ptitle" id="ptitle">📊 Dashboard Overview</div>
+    <span class="tchip">5,879 Students</span>
+    <span class="tchip">2024 · 2025 · 2026</span>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)"><div class="ldot"></div>Live</div>
+  </div>
+
+  <div class="apibar">
+    <span class="albl">🤖 AI Provider</span>
+    <div class="api-toggle">
+      <button class="api-tab claude active" id="tab-claude" onclick="switchProvider('claude')">Provider A</button>
+      <button class="api-tab openai" id="tab-openai" onclick="switchProvider('openai')">Provider B</button>
+    </div>
+    <input class="ainp" id="ak" type="password" placeholder="Paste your API key here..."/>
+    <button class="asave" onclick="saveK()">Save Key ✓</button>
+    <span class="astat" id="as" style="color:#ef4444">⬤ Not set</span>
+    <span class="api-hint" id="api-hint">Enter your AI provider API key</span>
+  </div>
+
+  <!-- Year Filter Bar -->
+  <div class="ybar">
+    <span class="ylbl">📅 Year Filter</span>
+    <div class="ybtn-group">
+      <button class="ybtn active" data-y="all" onclick="setYear('all',this)">All Years</button>
+      <button class="ybtn" data-y="2024" onclick="setYear('2024',this)">2024 Batch</button>
+      <button class="ybtn" data-y="2025" onclick="setYear('2025',this)">2025 Batch</button>
+      <button class="ybtn" data-y="2026" onclick="setYear('2026',this)">2026 Batch</button>
+    </div>
+    <span class="ystat" id="ystat">Showing: All 5,879 students</span>
+  </div>
+
+  <div class="content">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="pg-dashboard">
+    <div class="kg">
+      <div class="kc g1"><span class="kico">👥</span><div class="kv" id="kv-total">5,879</div><div class="kl">Total Students</div><div class="ks">2024 · 2025 · 2026 batches</div><div class="kglow"></div></div>
+      <div class="kc g2"><span class="kico">✅</span><div class="kv" id="kv-placed">2,266</div><div class="kl">Students Placed</div><div class="ks" id="kv-prate">38.5% placement rate</div><div class="kglow"></div></div>
+      <div class="kc g3"><span class="kico">📋</span><div class="kv" id="kv-reg">3,921</div><div class="kl">Registered</div><div class="ks" id="kv-dereg">1,664 deregistered</div><div class="kglow"></div></div>
+      <div class="kc g4"><span class="kico">⭐</span><div class="kv" id="kv-cgpa">8.25</div><div class="kl">Avg CGPA</div><div class="ks">median across batches</div><div class="kglow"></div></div>
+      <div class="kc g5"><span class="kico">📈</span><div class="kv" id="kv-pct">76.3%</div><div class="kl">Avg Score</div><div class="ks">mean academic %</div><div class="kglow"></div></div>
+      <div class="kc g6"><span class="kico">👩</span><div class="kv" id="kv-female">1,992</div><div class="kl">Female Students</div><div class="ks">33.9% of cohort</div><div class="kglow"></div></div>
+      <div class="kc g7"><span class="kico">⚠️</span><div class="kv" id="kv-bl">648</div><div class="kl">With Backlogs</div><div class="ks">11% of student base</div><div class="kglow"></div></div>
+      <div class="kc g8"><span class="kico">🎓</span><div class="kv" id="kv-male">3,845</div><div class="kl">Male Students</div><div class="ks">65.4% of cohort</div><div class="kglow"></div></div>
+    </div>
+    <div class="cg">
+      <div class="cc"><div class="cch"><div><div class="cct">Programme Distribution</div><div class="ccs">UG · Masters · Diploma</div></div><span class="ccb bd g">3 Levels</span></div><div class="cw h190"><canvas id="c-prog"></canvas></div></div>
+      <div class="cc"><div class="cch"><div><div class="cct">Branch Type Split</div><div class="ccs">Technical vs Non-Technical</div></div><span class="ccb bd b">2 Types</span></div><div class="cw h190"><canvas id="c-branch"></canvas></div></div>
+    </div>
+    <div class="cg g3">
+      <div class="cc"><div class="cch"><div><div class="cct">Students by Batch Year</div><div class="ccs">Enrolment & placement</div></div></div><div class="cw h190"><canvas id="c-year"></canvas></div></div>
+      <div class="cc"><div class="cch"><div><div class="cct">Registration Status</div><div class="ccs">Active placement registrations</div></div></div><div class="cw h190"><canvas id="c-reg"></canvas></div></div>
+      <div class="cc"><div class="cch"><div><div class="cct">Gender by Programme</div><div class="ccs">Male/Female split</div></div></div><div class="cw h190"><canvas id="c-gender"></canvas></div></div>
+    </div>
+    <div class="cg">
+      <div class="cc"><div class="cch"><div><div class="cct">Geographic Distribution</div><div class="ccs">Top states by student count</div></div><span class="ccb bd p">87% West Bengal</span></div><div class="cw h240"><canvas id="c-states"></canvas></div></div>
+      <div class="cc"><div class="cch"><div><div class="cct">Backlog Status</div><div class="ccs">Active vs cleared backlogs</div></div></div><div class="cw h240"><canvas id="c-bl"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- PLACEMENT -->
+  <div class="page" id="pg-placement">
+    <div class="kg">
+      <div class="kc g1"><span class="kico">🏆</span><div class="kv">2,266</div><div class="kl">Total Placed</div><div class="ks">across all batches</div><div class="kglow"></div></div>
+      <div class="kc g2"><span class="kico">📊</span><div class="kv">38.5%</div><div class="kl">Overall Rate</div><div class="ks">of total students</div><div class="kglow"></div></div>
+      <div class="kc g3"><span class="kico">⏳</span><div class="kv">3,613</div><div class="kl">Yet to Place</div><div class="ks">active opportunity pool</div><div class="kglow"></div></div>
+      <div class="kc g4"><span class="kico">🏥</span><div class="kv">90.6%</div><div class="kl">Best Rate</div><div class="ks">B.Sc Nursing stream</div><div class="kglow"></div></div>
+      <div class="kc g5"><span class="kico">🏢</span><div class="kv">RGCIRC</div><div class="kl">Top Recruiter</div><div class="ks">81 students hired</div><div class="kglow"></div></div>
+      <div class="kc g7"><span class="kico">📅</span><div class="kv">53%</div><div class="kl">Best Batch</div><div class="ks">2024 UG/Diploma</div><div class="kglow"></div></div>
+    </div>
+    <div class="cg">
+      <div class="cc full"><div class="cch"><div><div class="cct">Placement by Stream — Top 15</div><div class="ccs">Enrolled vs placed count per stream</div></div><span class="ccb bd g">Sorted by placed</span></div><div class="cw h280"><canvas id="c-sp"></canvas></div></div>
+      <div class="cc"><div class="cch"><div><div class="cct">Top 15 Hiring Companies</div><div class="ccs">Students placed per organisation</div></div></div><div class="cw h280"><canvas id="c-co"></canvas></div></div>
+      <div class="cc"><div class="cch"><div><div class="cct">Year-wise Placement Trend</div><div class="ccs">Total vs placed per batch</div></div></div><div class="cw h280"><canvas id="c-trend"></canvas></div></div>
+    </div>
+    <div class="tc"><div class="th"><span class="tt">📋 Stream-wise Placement Details</span><input class="sr" placeholder="Search stream..." oninput="ft('sp-t',this.value)"/></div><div class="tw"><table id="sp-t"><thead><tr><th onclick="st('sp-t',0)">Stream ↕</th><th onclick="st('sp-t',1)">Total ↕</th><th onclick="st('sp-t',2)">Placed ↕</th><th onclick="st('sp-t',3)">Rate ↕</th><th onclick="st('sp-t',4)">Type</th><th onclick="st('sp-t',5)">Level</th></tr></thead><tbody id="sp-b"></tbody></table></div></div>
+  </div>
+
+  <!-- ACADEMIC -->
+  <div class="page" id="pg-academic">
+    <div class="kg">
+      <div class="kc g1"><span class="kico">⭐</span><div class="kv">8.25</div><div class="kl">Median CGPA</div><div class="ks">4,111 students with data</div><div class="kglow"></div></div>
+      <div class="kc g2"><span class="kico">📈</span><div class="kv">76.3%</div><div class="kl">Avg Uni Score</div><div class="ks">3,355 students</div><div class="kglow"></div></div>
+      <div class="kc g3"><span class="kico">📝</span><div class="kv">66.8%</div><div class="kl">Avg Class 10</div><div class="ks">5,828 students</div><div class="kglow"></div></div>
+      <div class="kc g4"><span class="kico">🏫</span><div class="kv">72.5%</div><div class="kl">Avg Class 12</div><div class="ks">5,634 students</div><div class="kglow"></div></div>
+    </div>
+    <div class="cg">
+      <div class="cc"><div class="cch"><div><div class="cct">CGPA Distribution</div><div class="ccs">Students across CGPA bands</div></div><span class="ccb bd g">4,111 records</span></div><div class="cw h240"><canvas id="c-cgpa"></canvas></div></div>
+      <div class="cc"><div class="cch"><div><div class="cct">Academic Progression</div><div class="ccs">Class 10 → 12 → University avg %</div></div></div><div class="cw h240"><canvas id="c-aprog"></canvas></div></div>
+      <div class="cc full"><div class="cch"><div><div class="cct">Average CGPA by Stream</div><div class="ccs">Top 15 streams with valid CGPA data (≤10)</div></div><span class="ccb bd b">Highest first</span></div><div class="cw h280"><canvas id="c-cstr"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- STREAMS -->
+  <div class="page" id="pg-streams">
+    <div class="fr">
+      <span class="fl">Filter:</span>
+      <select class="fs" id="fl1" onchange="fstr()"><option value="">All Levels</option><option>UG Programme</option><option>Masters</option><option>Diploma</option></select>
+      <select class="fs" id="fl2" onchange="fstr()"><option value="">All Types</option><option>Technical</option><option>Non-Technical</option></select>
+    </div>
+    <div class="cg">
+      <div class="cc"><div class="cch"><div><div class="cct">Placement Rate by Stream</div><div class="ccs">% placed — green≥60% · amber≥40%</div></div></div><div class="cw h280"><canvas id="c-srate"></canvas></div></div>
+      <div class="cc"><div class="cch"><div><div class="cct">Programme Level Share</div><div class="ccs">UG · Masters · Diploma distribution</div></div></div><div class="cw h280"><canvas id="c-slv"></canvas></div></div>
+    </div>
+    <div class="tc"><div class="th"><span class="tt">🎯 All Streams — Complete View</span><input class="sr" placeholder="Search stream..." oninput="ft('all-t',this.value)"/></div><div class="tw"><table id="all-t"><thead><tr><th onclick="st('all-t',0)">Stream ↕</th><th onclick="st('all-t',1)">Total ↕</th><th onclick="st('all-t',2)">Placed ↕</th><th onclick="st('all-t',3)">Rate ↕</th><th onclick="st('all-t',4)">Male</th><th onclick="st('all-t',5)">Female</th><th onclick="st('all-t',6)">Backlogs ↕</th><th onclick="st('all-t',7)">Avg % ↕</th><th onclick="st('all-t',8)">Type</th><th onclick="st('all-t',9)">Level</th></tr></thead><tbody id="all-b"></tbody></table></div></div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="page" id="pg-skills">
+    <div class="kg">
+      <div class="kc g1"><span class="kico">💡</span><div class="kv">66%</div><div class="kl">Soft Skills Score</div><div class="ks">avg 2,798 students</div><div class="kglow"></div></div>
+      <div class="kc g2"><span class="kico">🧮</span><div class="kv">63%</div><div class="kl">Aptitude Score</div><div class="ks">avg 2,452 students</div><div class="kglow"></div></div>
+      <div class="kc g3"><span class="kico">📅</span><div class="kv">45%</div><div class="kl">SS Attendance</div><div class="ks">avg attendance rate</div><div class="kglow"></div></div>
+      <div class="kc g4"><span class="kico">📅</span><div class="kv">54%</div><div class="kl">Apt Attendance</div><div class="ks">avg attendance rate</div><div class="kglow"></div></div>
+    </div>
+    <div class="cg">
+      <div class="cc"><div class="cch"><div><div class="cct">Soft Skills Score by Stream</div><div class="ccs">Average % · 2025 & 2026 batches</div></div><span class="ccb bd g">Higher = better</span></div><div class="cw h320"><canvas id="c-ss"></canvas></div></div>
+      <div class="cc"><div class="cch"><div><div class="cct">Aptitude Score by Stream</div><div class="ccs">Average % · 2025 & 2026 batches</div></div><span class="ccb bd b">Higher = stronger</span></div><div class="cw h320"><canvas id="c-apt"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- CHATBOT -->
+  <div class="page" id="pg-chatbot">
+    <div class="csh">
+      <div class="csb">
+        <div class="ib">
+          <div class="ibt">💡 Quick Questions</div>
+          <div class="qq" onclick="askQ('Which stream has the highest placement rate? Explain the key reasons with data.')">🏆 Best placement stream?</div>
+          <div class="qq" onclick="askQ('Give a complete year-wise analysis comparing 2024, 2025 and 2026 batches — registration, placement trends and key differences.')">📅 Year-wise trends</div>
+          <div class="qq" onclick="askQ('Compare academic and placement performance of Technical vs Non-Technical branch students with specific data points.')">⚡ Tech vs Non-Tech analysis</div>
+          <div class="qq" onclick="askQ('Provide a deep gender diversity analysis across all programmes with actionable recommendations for improvement.')">👤 Gender diversity</div>
+          <div class="qq" onclick="askQ('Analyse how active backlogs correlate with placement outcomes. Which streams are most affected and why?')">⚠️ Backlogs impact</div>
+          <div class="qq" onclick="askQ('Which industry sectors are hiring the most BWU students? What does this reveal about market demand and skill requirements?')">🏢 Industry hiring trends</div>
+          <div class="qq" onclick="askQ('Based on all the data available, give me top 5 strategic recommendations to significantly improve BWU overall placement rate.')">💡 Top 5 recommendations</div>
+          <div class="qq" onclick="askQ('What do the aptitude and soft skills scores reveal about student job readiness? Which streams perform best and which need improvement?')">🧠 Skills readiness</div>
+          <div class="qq" onclick="askQ('Which streams have the lowest placement rates? What are the possible structural reasons and how can they be improved?')">📉 Underperforming streams</div>
+        </div>
+        <div class="ib">
+          <div class="ibt">📊 Live Stats</div>
+          <div class="sr2"><span class="sk">Total Students</span><span class="sv" style="color:#00dc82">5,879</span></div>
+          <div class="sr2"><span class="sk">Placed</span><span class="sv" style="color:#60a5fa">2,266</span></div>
+          <div class="sr2"><span class="sk">Placement Rate</span><span class="sv" style="color:#fbbf24">38.5%</span></div>
+          <div class="sr2"><span class="sk">Top Stream (size)</span><span class="sv" style="color:#c084fc">BCA (779)</span></div>
+          <div class="sr2"><span class="sk">Top Recruiter</span><span class="sv" style="color:#22d3ee">RGCIRC (81)</span></div>
+          <div class="sr2"><span class="sk">Best Placement %</span><span class="sv" style="color:#00dc82">Nursing 90.6%</span></div>
+          <div class="sr2"><span class="sk">Median CGPA</span><span class="sv" style="color:#f9a8d4">8.25</span></div>
+        </div>
+      </div>
+      <div class="cm">
+        <div class="chdr">
+          <div class="aorb">🤖</div>
+          <div><div class="ctit">BWU AI Intelligence</div><div class="cst" id="aiSt">⚡ RAG loaded · 5,879 records indexed · Set API key above to activate</div></div>
+        </div>
+        <div class="msw" id="cmsgs">
+          <div class="mr">
+            <div class="av b">🤖</div>
+            <div class="bb b">👋 Hello! I am your <strong>BWU Student Intelligence Assistant</strong> with full RAG access to <strong>5,879 student records</strong> (2024–2026).
+
+To activate:
+1️⃣ Select your preferred AI provider at the top
+2️⃣ Paste your API key and click <strong>Save Key ✓</strong>
+3️⃣ Ask me anything!
+
+I can analyse placement trends, academic performance, gender diversity, stream comparisons, skills data, and give you strategic recommendations!</div>
+          </div>
+        </div>
+        <div class="cia">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:10px">
+            <span>Enter to send · Shift+Enter for new line</span>
+            <span id="cks" style="color:#ef4444">⬤ API key not set</span>
+          </div>
+          <div class="cir">
+            <textarea class="cta" id="cta" placeholder="Ask a deep analytical question..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendC()}"></textarea>
+            <button class="sb2" id="sbtn" onclick="sendC()">Send ↗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+const P=['#059669','#3b82f6','#d97706','#7c3aed','#0891b2','#db2777','#ea580c','#0d9488','#dc2626','#4f46e5','#65a30d','#c026d3'];
+Chart.defaults.color='#64748b';Chart.defaults.borderColor='#e2e8f0';Chart.defaults.font.family="'Segoe UI',system-ui,sans-serif";Chart.defaults.font.size=11;
+const CS={};
+function mk(id,type,labels,ds,opts={}){
+  const el=document.getElementById(id);if(!el)return;
+  if(CS[id])CS[id].destroy();
+  CS[id]=new Chart(el,{type,data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500,easing:'easeOutQuart'},plugins:{legend:{position:'bottom',labels:{boxWidth:11,padding:11,color:'#64748b',font:{size:10}}},tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#94a3b8',padding:9,cornerRadius:8}},scales:['bar','line'].includes(type)?{x:{grid:{color:'#f1f5f9'},ticks:{color:'#64748b'}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#64748b'}}}:{},...opts}});
+}
+
+// ── Year-wise data ──────────────────────────────────────────────
+const YD = {
+  all:  {total:5879, placed:2266, reg:3921, dereg:1664, notreg:294, bl:648, male:3845, female:1992, tech:4390, nontech:1489, ug:4208, masters:1126, dip:545, cgpa:8.25, pct:76.3, c10:66.8, c12:72.5, ss:66, apt:63,
+          cgpaDist:[89,412,876,1654,1080],
+          states:[5127,190,168,52,39,14,9,3],
+          genderProg:[{p:'Diploma',m:354,f:191},{p:'Masters',m:705,f:420},{p:'UG',m:2786,f:1381}],
+          batches:[{y:'2024 PG',t:320,p:68},{y:'2024 UG',t:977,p:518},{y:'2025',t:2301,p:893},{y:'2026',t:2281,p:787}],
+          label:'All 5,879 students'},
+  '2024':{total:1297, placed:586, reg:667, dereg:614, notreg:16, bl:89, male:846, female:451, tech:960, nontech:337, ug:977, masters:320, dip:0, cgpa:8.35, pct:75.8, c10:66.2, c12:71.9, ss:0, apt:0,
+          cgpaDist:[22,98,210,388,234],
+          states:[1135,42,38,12,9,4,2,1],
+          genderProg:[{p:'Diploma',m:0,f:0},{p:'Masters',m:224,f:96},{p:'UG',m:622,f:355}],
+          batches:[{y:'PG_2024',t:320,p:68},{y:'UG_2024',t:977,p:518}],
+          label:'2024 Batch — 1,297 students'},
+  '2025':{total:2301, placed:893, reg:1208, dereg:1015, notreg:78, bl:312, male:1502, female:799, tech:1710, nontech:591, ug:1785, masters:400, dip:116, cgpa:8.18, pct:76.8, c10:67.1, c12:72.8, ss:66, apt:63,
+          cgpaDist:[38,172,356,680,421],
+          states:[1998,82,71,22,16,5,4,1],
+          genderProg:[{p:'Diploma',m:68,f:48},{p:'Masters',m:278,f:122},{p:'UG',m:1156,f:629}],
+          batches:[{y:'2025',t:2301,p:893}],
+          label:'2025 Batch — 2,301 students'},
+  '2026':{total:2281, placed:787, reg:2046, dereg:35, notreg:200, bl:247, male:1497, female:742, tech:1720, nontech:561, ug:1446, masters:406, dip:429, cgpa:8.29, pct:75.9, c10:66.9, c12:72.1, ss:0, apt:0,
+          cgpaDist:[29,142,310,586,425],
+          states:[1994,66,59,18,14,5,3,1],
+          genderProg:[{p:'Diploma',m:286,f:143},{p:'Masters',m:203,f:202},{p:'UG',m:1008,f:397}],
+          batches:[{y:'2026',t:2281,p:787}],
+          label:'2026 Batch — 2,281 students'}
+};
+
+// Streams keyed by year source
+const S_ALL=[
+  {n:'BCA',t:779,p:252,m:554,f:225,bl:63,cgpa:9.93,pct:79.5,ss:68.1,apt:61.0,pr:'UG Programme',br:'Technical',r:32.3,yr:['2024','2025']},
+  {n:'BTech CSE-AIML',t:720,p:190,m:593,f:127,bl:40,cgpa:8.29,pct:78.6,ss:71.8,apt:63.1,pr:'UG Programme',br:'Technical',r:26.4,yr:['2025','2026']},
+  {n:'BBA HM',t:438,p:259,m:166,f:272,bl:73,cgpa:0,pct:0,ss:58.1,apt:0,pr:'UG Programme',br:'Non-Technical',r:59.1,yr:['2024','2025']},
+  {n:'MCA',t:409,p:104,m:307,f:102,bl:19,cgpa:8.65,pct:81.2,ss:0,apt:0,pr:'Masters',br:'Technical',r:25.4,yr:['2024','2025']},
+  {n:'BTech CSE-DS',t:378,p:113,m:307,f:71,bl:21,cgpa:8.28,pct:78.1,ss:67.3,apt:71.2,pr:'UG Programme',br:'Technical',r:29.9,yr:['2025','2026']},
+  {n:'BBA',t:310,p:170,m:207,f:103,bl:50,cgpa:0,pct:0,ss:54.0,apt:62.0,pr:'UG Programme',br:'Non-Technical',r:54.8,yr:['2024','2025']},
+  {n:'MBA',t:272,p:156,m:188,f:84,bl:41,cgpa:8.69,pct:74.5,ss:0,apt:63.0,pr:'Masters',br:'Non-Technical',r:57.4,yr:['2024','2025']},
+  {n:'Diploma CSE',t:181,p:49,m:124,f:57,bl:39,cgpa:0,pct:83.1,ss:0,apt:69.0,pr:'Diploma',br:'Technical',r:27.1,yr:['2025','2026']},
+  {n:'BTech CSE',t:160,p:67,m:134,f:26,bl:12,cgpa:8.99,pct:78.6,ss:0,apt:0,pr:'UG Programme',br:'Technical',r:41.9,yr:['2024']},
+  {n:'BMLT',t:122,p:32,m:66,f:56,bl:8,cgpa:0,pct:82.5,ss:0,apt:0,pr:'UG Programme',br:'Technical',r:26.2,yr:['2024','2025']},
+  {n:'BSC ANCS',t:116,p:34,m:85,f:31,bl:32,cgpa:0,pct:76.3,ss:63.0,apt:55.0,pr:'UG Programme',br:'Technical',r:29.3,yr:['2024','2025']},
+  {n:'B.Pharmacy',t:110,p:78,m:62,f:48,bl:26,cgpa:0,pct:82.2,ss:0,apt:0,pr:'UG Programme',br:'Technical',r:70.9,yr:['2024','2025']},
+  {n:'B.Agri',t:103,p:22,m:76,f:27,bl:9,cgpa:8.86,pct:71.3,ss:74.0,apt:0,pr:'UG Programme',br:'Technical',r:21.4,yr:['2026']},
+  {n:'LLB',t:85,p:25,m:42,f:43,bl:7,cgpa:8.23,pct:75.8,ss:0,apt:0,pr:'UG Programme',br:'Non-Technical',r:29.4,yr:['2025','2026']},
+  {n:'BBA DM',t:78,p:29,m:50,f:28,bl:8,cgpa:0,pct:76.0,ss:57.0,apt:46.0,pr:'UG Programme',br:'Non-Technical',r:37.2,yr:['2025']},
+  {n:'Diploma EE',t:67,p:57,m:61,f:6,bl:4,cgpa:0,pct:79.4,ss:0,apt:57.0,pr:'Diploma',br:'Technical',r:85.1,yr:['2024','2025']},
+  {n:'B.Sc Nursing',t:64,p:58,m:12,f:52,bl:2,cgpa:0,pct:76.1,ss:0,apt:0,pr:'UG Programme',br:'Technical',r:90.6,yr:['2025','2026']},
+  {n:'MSC ANCS',t:60,p:18,m:44,f:16,bl:5,cgpa:0,pct:73.2,ss:0,apt:0,pr:'Masters',br:'Technical',r:30.0,yr:['2025','2026']},
+  {n:'B.Optometry',t:57,p:40,m:25,f:32,bl:3,cgpa:0,pct:0,ss:0,apt:0,pr:'UG Programme',br:'Technical',r:70.2,yr:['2025']},
+  {n:'D.Pharma',t:54,p:41,m:30,f:24,bl:4,cgpa:0,pct:81.5,ss:0,apt:0,pr:'Diploma',br:'Technical',r:75.9,yr:['2024','2025']}
+];
+
+let CY='all'; // current year filter
+
+function getS(){ return CY==='all' ? S_ALL : S_ALL.filter(s=>s.yr.includes(CY)); }
+function getD(){ return YD[CY]; }
+
+// ── Year filter ──
+function setYear(y, btn){
+  CY=y;
+  document.querySelectorAll('.ybtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const d=getD();
+  document.getElementById('ystat').textContent='Showing: '+d.label;
+  rebuildAll();
+}
+
+function rebuildAll(){
+  bD(); bP(); bA(); bS(); bK();
+}
+
+// ── Dashboard ──
+function bD(){
+  const d=getD();
+  // Update KPI values
+  const kv=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  kv('kv-total',d.total.toLocaleString());
+  kv('kv-placed',d.placed.toLocaleString());
+  kv('kv-prate',+(d.placed/d.total*100).toFixed(1)+'% placement rate');
+  kv('kv-reg',d.reg.toLocaleString());
+  kv('kv-dereg',d.dereg.toLocaleString()+' deregistered');
+  kv('kv-bl',d.bl.toLocaleString());
+  kv('kv-male',d.male.toLocaleString());
+  kv('kv-female',d.female.toLocaleString());
+  kv('kv-cgpa',d.cgpa);
+  kv('kv-pct',d.pct+'%');
+
+  mk('c-prog','doughnut',['UG Programme','Masters','Diploma'],[{data:[d.ug,d.masters,d.dip],backgroundColor:['#3b82f6','#00dc82','#f59e0b'],borderWidth:2,borderColor:'#fff',hoverOffset:8}],{plugins:{legend:{position:'right'}}});
+  mk('c-branch','doughnut',['Technical','Non-Technical'],[{data:[d.tech,d.nontech],backgroundColor:['#059669','#f59e0b'],borderWidth:2,borderColor:'#fff',hoverOffset:8}],{plugins:{legend:{position:'right'}}});
+  mk('c-year','bar',d.batches.map(b=>b.y),[{label:'Total',data:d.batches.map(b=>b.t),backgroundColor:'#3b82f677',borderRadius:6,borderSkipped:false},{label:'Placed',data:d.batches.map(b=>b.p),backgroundColor:'#05966977',borderRadius:6,borderSkipped:false}]);
+  mk('c-reg','doughnut',['Registered','Deregistered','Not Registered'],[{data:[d.reg,d.dereg,d.notreg],backgroundColor:['#059669','#ef4444','#f59e0b'],borderWidth:2,borderColor:'#fff',hoverOffset:8}],{plugins:{legend:{position:'right'}}});
+  mk('c-gender','bar',['Diploma','Masters','UG'],[{label:'Male',data:d.genderProg.map(g=>g.m),backgroundColor:'#3b82f677',borderRadius:5,borderSkipped:false},{label:'Female',data:d.genderProg.map(g=>g.f),backgroundColor:'#f472b677',borderRadius:5,borderSkipped:false}]);
+  mk('c-states','bar',['West Bengal','Jharkhand','Bihar','Tripura','Assam','U.P','Odisha','Meghalaya'],[{label:'Students',data:d.states,backgroundColor:P.map(c=>c+'99'),borderRadius:5}],{indexAxis:'y',plugins:{legend:{display:false}}});
+  mk('c-bl','doughnut',['No Backlogs','Has Backlogs'],[{data:[d.total-d.bl,d.bl],backgroundColor:['#059669','#ef4444'],borderWidth:2,borderColor:'#fff',hoverOffset:8}],{plugins:{legend:{position:'right'}}});
+}
+
+// ── Placement ──
+function bP(){
+  const S=getS();
+  const top=S.slice(0,15);
+  mk('c-sp','bar',top.map(s=>s.n.length>20?s.n.slice(0,20)+'…':s.n),[{label:'Total',data:top.map(s=>s.t),backgroundColor:'#3b82f633',borderRadius:4},{label:'Placed',data:top.map(s=>s.p),backgroundColor:P.map(c=>c+'bb'),borderRadius:4}]);
+  const co=[{c:'RGCIRC',n:81},{c:'MedPlus',n:66},{c:'SPARKIIT',n:31},{c:'Axis Securities',n:27},{c:'HL Mando Anand',n:27},{c:'Vijaya Diagnostics',n:24},{c:'Rinex Technologies',n:23},{c:'Apollo Pharmacy',n:22},{c:'Junomoneta',n:22},{c:'HL Mando India',n:21},{c:'Lenskart',n:19},{c:'Zenus Group',n:19},{c:'SmartED',n:18},{c:'Acmegrade',n:16},{c:'Amazon',n:12}];
+  mk('c-co','bar',co.map(c=>c.c),[{label:'Hired',data:co.map(c=>c.n),backgroundColor:co.map((_,i)=>P[i%P.length]+'bb'),borderRadius:4}],{indexAxis:'y',plugins:{legend:{display:false}}});
+  const d=getD();
+  mk('c-trend','bar',d.batches.map(b=>b.y),[{label:'Total',data:d.batches.map(b=>b.t),backgroundColor:'#6366f177',borderRadius:5,borderSkipped:false},{label:'Placed',data:d.batches.map(b=>b.p),backgroundColor:'#05966977',borderRadius:5,borderSkipped:false}]);
+  const tb=document.getElementById('sp-b');
+  tb.innerHTML=S.map(s=>`<tr><td><strong>${s.n}</strong></td><td>${s.t}</td><td>${s.p}</td><td><div style="display:flex;align-items:center;gap:5px"><div class="pb"><div class="pf" style="width:${Math.min(s.r,100)}%;background:${s.r>=60?'#059669':s.r>=40?'#d97706':'#dc2626'}"></div></div><span style="color:${s.r>=60?'#059669':s.r>=40?'#d97706':'#dc2626'};font-weight:700">${s.r}%</span></div></td><td><span class="bd ${s.br==='Technical'?'b':'a'}">${s.br}</span></td><td><span class="bd ${s.pr==='Masters'?'g':s.pr==='Diploma'?'p':'c'}">${s.pr}</span></td></tr>`).join('');
+}
+
+// ── Academic ──
+function bA(){
+  const d=getD();
+  mk('c-cgpa','bar',['< 6','6 – 7','7 – 8','8 – 9','9 – 10'],[{label:'Students',data:d.cgpaDist,backgroundColor:['#ef444488','#f59e0b88','#3b82f688','#05966988','#a855f788'],borderRadius:8,borderSkipped:false}],{plugins:{legend:{display:false}}});
+  mk('c-aprog','line',['Class 10','Class 12','University'],[{label:'Avg %',data:[d.c10,d.c12,d.pct],borderColor:'#059669',backgroundColor:'#05966922',fill:true,tension:.4,pointRadius:8,pointBackgroundColor:'#059669',pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3}],{plugins:{legend:{display:false}},scales:{y:{min:55,max:85,grid:{color:'#f1f5f9'},ticks:{color:'#64748b',callback:v=>v+'%'}},x:{grid:{color:'#f1f5f9'},ticks:{color:'#64748b'}}}});
+  const cs=getS().filter(s=>s.cgpa>0&&s.cgpa<=10).sort((a,b)=>b.cgpa-a.cgpa).slice(0,14);
+  mk('c-cstr','bar',cs.map(s=>s.n.length>18?s.n.slice(0,18)+'…':s.n),[{label:'CGPA',data:cs.map(s=>s.cgpa),backgroundColor:cs.map((_,i)=>P[i%P.length]+'cc'),borderRadius:6,borderSkipped:false}],{plugins:{legend:{display:false}}});
+}
+
+// ── Streams ──
+function bS(){
+  const S=getS();
+  const br=S.filter(s=>s.r>0).sort((a,b)=>b.r-a.r).slice(0,15);
+  mk('c-srate','bar',br.map(s=>s.n.length>18?s.n.slice(0,18)+'…':s.n),[{label:'Placement %',data:br.map(s=>s.r),backgroundColor:br.map(s=>s.r>=60?'#059669cc':s.r>=40?'#d97706cc':'#dc2626cc'),borderRadius:5,borderSkipped:false}],{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#64748b',callback:v=>v+'%'}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#64748b'}}}});
+  const d=getD();
+  mk('c-slv','doughnut',['UG Programme','Masters','Diploma'],[{data:[d.ug,d.masters,d.dip],backgroundColor:['#3b82f6','#059669','#f59e0b'],borderWidth:2,borderColor:'#fff',hoverOffset:8}],{plugins:{legend:{position:'right'}}});
+  const ab=document.getElementById('all-b');
+  ab.innerHTML=S.map(s=>`<tr data-lv="${s.pr}" data-br="${s.br}"><td><strong>${s.n}</strong></td><td>${s.t}</td><td>${s.p}</td><td><span style="font-weight:700;color:${s.r>=60?'#059669':s.r>=40?'#d97706':'#dc2626'}">${s.r}%</span></td><td>${s.m}</td><td>${s.f}</td><td><span style="color:${s.bl>40?'#dc2626':'#94a3b8'}">${s.bl}</span></td><td>${s.pct>0?s.pct+'%':'—'}</td><td><span class="bd ${s.br==='Technical'?'b':'a'}">${s.br}</span></td><td><span class="bd ${s.pr==='Masters'?'g':s.pr==='Diploma'?'p':'c'}">${s.pr.replace(' Programme','')}</span></td></tr>`).join('');
+}
+
+// ── Skills ──
+function bK(){
+  const S=getS();
+  const ss=S.filter(s=>s.ss>0).sort((a,b)=>b.ss-a.ss).slice(0,14);
+  mk('c-ss','bar',ss.map(s=>s.n.length>18?s.n.slice(0,18)+'…':s.n),[{label:'Soft Skills %',data:ss.map(s=>s.ss),backgroundColor:ss.map((_,i)=>['#059669','#0d9488','#0891b2'][i%3]+'cc'),borderRadius:5}],{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'#f1f5f9'}},y:{ticks:{color:'#64748b'},grid:{color:'#f1f5f9'}}}});
+  const apt=S.filter(s=>s.apt>0).sort((a,b)=>b.apt-a.apt).slice(0,14);
+  mk('c-apt','bar',apt.map(s=>s.n.length>18?s.n.slice(0,18)+'…':s.n),[{label:'Aptitude %',data:apt.map(s=>s.apt),backgroundColor:apt.map((_,i)=>['#4f46e5','#7c3aed','#9333ea'][i%3]+'cc'),borderRadius:5}],{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'#f1f5f9'}},y:{ticks:{color:'#64748b'},grid:{color:'#f1f5f9'}}}});
+}
+
+const TITLES={dashboard:'📊 Dashboard Overview',placement:'🏆 Placement Analytics',academic:'📚 Academic Performance',streams:'🎯 Stream Analysis',skills:'🧠 Skills & Aptitude',chatbot:'💬 AI Intelligence Chatbot'};
+function nav(el){
+  const p=el.dataset.p;
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  document.getElementById('pg-'+p).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('ptitle').textContent=TITLES[p];
+  setTimeout(rebuildAll,60);
+}
+
+let open=true;
+function toggleSB(){
+  open=!open;
+  document.getElementById('sb').classList.toggle('mini',!open);
+  document.getElementById('sbbtn').textContent=open?'◀ Collapse':'▶';
+  ['lt','ng1','ng2'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=open?'':'none'});
+  document.querySelectorAll('.ni span:last-child,.ng').forEach(e=>{e.style.display=open?'':'none'});
+}
+
+function ft(id,q){const ql=q.toLowerCase();document.querySelectorAll(`#${id} tbody tr`).forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(ql)?'':'none'})}
+function st(id,col){
+  const tb=document.querySelector(`#${id} tbody`);
+  const rows=[...tb.querySelectorAll('tr')];
+  const asc=tb.dataset['s'+col]==='1';tb.dataset['s'+col]=asc?'0':'1';
+  rows.sort((a,b)=>{const av=a.cells[col]?.textContent.trim()||'';const bv=b.cells[col]?.textContent.trim()||'';const an=parseFloat(av),bn=parseFloat(bv);if(!isNaN(an)&&!isNaN(bn))return asc?an-bn:bn-an;return asc?av.localeCompare(bv):bv.localeCompare(av)});
+  rows.forEach(r=>tb.appendChild(r));
+}
+function fstr(){const lv=document.getElementById('fl1').value;const br=document.getElementById('fl2').value;document.querySelectorAll('#all-t tbody tr').forEach(r=>{r.style.display=(!lv||r.dataset.lv===lv)&&(!br||r.dataset.br===br)?'':'none'})}
+
+let API='', PROVIDER='claude';
+
+function switchProvider(p){
+  PROVIDER=p;
+  document.getElementById('tab-claude').className='api-tab claude'+(p==='claude'?' active':'');
+  document.getElementById('tab-openai').className='api-tab openai'+(p==='openai'?' active':'');
+  document.getElementById('ak').value='';
+  document.getElementById('as').textContent='⬤ Not set';
+  document.getElementById('as').style.color='#ef4444';
+  document.getElementById('api-hint').textContent='Enter your API key for the selected provider';
+  document.getElementById('ak').placeholder='Paste your API key here...';
+  document.getElementById('cks').textContent='⬤ Provider changed — re-save key';
+  document.getElementById('cks').style.color='#f59e0b';
+  API='';
+}
+
+function saveK(){
+  const k=document.getElementById('ak').value.trim();
+  if(!k){alert('Please paste your API key.');return;}
+  if(PROVIDER==='claude'&&!k.startsWith('sk-ant-')&&!k.startsWith('sk-')){
+    if(!confirm('This key does not look like an Anthropic key (should start with sk-ant-). Save anyway?'))return;
+  }
+  if(PROVIDER==='openai'&&!k.startsWith('sk-')){
+    if(!confirm('This key format looks unusual. Save anyway?'))return;
+  }
+  API=k;
+  document.getElementById('as').textContent='⬤ Key saved ✓';
+  document.getElementById('as').style.color='#059669';
+  document.getElementById('cks').textContent='⬤ AI key active';
+  document.getElementById('cks').style.color='#059669';
+  document.getElementById('aiSt').textContent='⚡ RAG loaded · 5,879 records indexed · AI Assistant ready!';
+}
+
+const SYS=`You are an expert education data analyst AI for Brainware University (BWU). Reason step-by-step and give deep, structured, actionable insights.
+
+DATASET: 5,879 students · 2024–2026 batches. Sources: PG_2024(320), UG_Diploma_2024(977), Master_2025(2301), Master_2026(2281)
+OVERVIEW: Placed:2266(38.5%) | Registered:3921 | Deregistered:1664 | Backlogs:648
+GENDER: Male:3845(65.4%) | Female:1992(33.9%)
+LEVELS: UG:4208 | Masters:1126 | Diploma:545
+BRANCH: Technical:4390 | Non-Technical:1489
+
+STREAMS (enrolment): BCA:779, BTech CSE-AIML:720, BBA HM:438, MCA:409, BTech CSE-DS:378, BBA:310, MBA:272, DiplomaCSE:181, BTechCSE:160, BMLT:122, BSC ANCS:116, B.Pharmacy:110, B.Agri:103, LLB:85, BBADM:78
+
+PLACEMENT: BBA HM:259(59.1%), BCA:252(32.3%), BTech CSE-AIML:190(26.4%), BBA:170(54.8%), MBA:156(57.4%), BTech CSE-DS:113(29.9%), MCA:104(25.4%), B.Pharmacy:78(70.9%), BTech CSE:67(41.9%), DiplomaEE:57(85.1%), B.Sc Nursing:58(90.6%), D.Pharma:41(75.9%)
+
+TOP COMPANIES: RGCIRC:81, MedPlus:66, SPARKIIT:31, Axis Securities:27, HL Mando Anand:27, Vijaya Diagnostics:24, Rinex Technologies:23, Apollo Pharmacy:22, Junomoneta:22, Lenskart:19, Amazon:12
+
+CGPA (valid ≤10): BTech CSE:8.99, B.Agri:8.86, MBA:8.69, MCA:8.65, B.Com:8.52, BTech CSE-AIML:8.29, BTech CSE-DS:8.28, LLB:8.23
+
+BACKLOGS: BBA HM:73, BCA:63, BBA:50, MBA:41, BTech CSE-AIML:40, DiplomaCSE:39
+
+ACADEMIC: Class10:66.8% | Class12:72.5% | University:76.3% | Median CGPA:8.25
+
+SKILLS (2025/2026 only): SoftSkills:66% avg | Aptitude:63% avg
+SoftSkills by stream: B.Agri:74%, BTech CSE-AIML:71.8%, BCA:68.1%, BTech CSE-DS:67.3%, BBADM:57%, BBA:54%
+Aptitude by stream: BTech-RA:92%, BCOM:74%, BTech CSE-DS:71.2%, DiplomaCSE:69%, BCA:61%, BBA:62%
+
+YEAR: 2024PG:21.3% | 2024UG:53% | 2025:38.8% | 2026:34.5%
+STATES: West Bengal:5127(87%) | Jharkhand:190 | Bihar:168 | Tripura:52 | Assam:39
+
+Rules: Use numbered insights, cite specific numbers, give recommendations, flag data gaps, be analytical.`;
+
+const H=[],cmsgs=document.getElementById('cmsgs'),cta=document.getElementById('cta'),sbtn=document.getElementById('sbtn');
+
+function addB(text,role){
+  const row=document.createElement('div');row.className='mr'+(role==='user'?' u':'');
+  const av=document.createElement('div');av.className='av '+(role==='user'?'u':'b');av.textContent=role==='user'?'👤':'🤖';
+  const bb=document.createElement('div');bb.className='bb '+(role==='err'?'e':role);bb.textContent=text;
+  if(role==='bot'){
+    const s=document.createElement('div');s.className='bsrc';
+    const provLabel='AI Assistant';
+    s.textContent='⚡ '+provLabel+' · RAG: 5,879 BWU records · '+new Date().toLocaleTimeString();
+    bb.appendChild(s);
+  }
+  row.appendChild(av);row.appendChild(bb);cmsgs.appendChild(row);cmsgs.scrollTop=cmsgs.scrollHeight;
+}
+
+function showTyp(){
+  const row=document.createElement('div');row.className='mr';
+  row.innerHTML=`<div class="av b">🤖</div><div class="bb b"><div class="tyd"><span></span><span></span><span></span></div></div>`;
+  cmsgs.appendChild(row);cmsgs.scrollTop=cmsgs.scrollHeight;return row;
+}
+
+async function sendC(){
+  if(!API){alert('Please paste your API key in the bar at the top and click Save Key first.');return;}
+  const q=cta.value.trim();if(!q||sbtn.disabled)return;
+  cta.value='';cta.style.height='40px';
+  addB(q,'user');sbtn.disabled=true;sbtn.textContent='...';
+  const t=showTyp();H.push({role:'user',content:q});
+  try{
+    let reply='';
+    if(PROVIDER==='claude'){
+      // ── Claude (Anthropic) ──
+      const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':API,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS,messages:H})
+      });
+      if(!r.ok){const e=await r.text();throw new Error('API error '+r.status+': '+e.slice(0,200));}
+      const d=await r.json();
+      reply=d.content.map(b=>b.text||'').join('');
+    } else {
+      // ── OpenAI (ChatGPT) ──
+      const msgs=[{role:'system',content:SYS},...H];
+      const r=await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+API},
+        body:JSON.stringify({model:'gpt-4o',max_tokens:1000,messages:msgs})
+      });
+      if(!r.ok){const e=await r.text();throw new Error('API error '+r.status+': '+e.slice(0,200));}
+      const d=await r.json();
+      reply=d.choices?.[0]?.message?.content||'No response received.';
+    }
+    t.remove();H.push({role:'assistant',content:reply});
+    addB(reply,'bot');
+  }catch(e){
+    t.remove();
+    addB('Error: '+e.message+'\n\nPlease check your API key and try again.','err');
+    H.pop();
+  }
+  sbtn.disabled=false;sbtn.textContent='Send ↗';cmsgs.scrollTop=cmsgs.scrollHeight;
+}
+
+function askQ(q){nav(document.querySelector('[data-p="chatbot"]'));cta.value=q;sendC();}
+cta.addEventListener('input',()=>{cta.style.height='40px';cta.style.height=Math.min(cta.scrollHeight,100)+'px'});
+
+window.addEventListener('load',()=>{rebuildAll();});
+</script>
+</body>
+</html>
